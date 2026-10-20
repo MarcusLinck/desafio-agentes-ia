@@ -6,8 +6,8 @@
     "lib": ["esnext"],
     "types": ["node"],
     
-    // Diretórios
-    "rootDir": "./src",
+    // Altera o rootDir para a raiz para englobar a pasta prisma
+    "rootDir": ".",
     "outDir": "./dist",
 
     // Configurações de Saída e Qualidade
@@ -19,5 +19,5 @@
     "verbatimModuleSyntax": false,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "prisma/**/*"]
 }
