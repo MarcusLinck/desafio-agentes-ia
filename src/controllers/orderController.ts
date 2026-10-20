@@ -30,7 +30,7 @@ export async function getOrderById(req: Request, res: Response) {
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Parâmetro inválido',
-        message: validationResult.error.issues[0]?.message || 'ID em formato inválido.',
+        message: validationResult.error.issues[0]?.message,
       });
     }
 
@@ -122,7 +122,7 @@ export async function updateOrderStatus(req: Request, res: Response) {
     if (!paramValidation.success) {
       return res.status(400).json({
         error: 'Parâmetro inválido',
-        message: paramValidation.error.issues[0]?.message || 'ID em formato inválido.',
+        message: paramValidation.error.issues[0]?.message,
       });
     }
 
@@ -131,7 +131,7 @@ export async function updateOrderStatus(req: Request, res: Response) {
     if (!bodyValidation.success) {
       return res.status(400).json({
         error: 'Status inválido',
-        message: bodyValidation.error.issues[0]?.message || 'Status inválido.',
+        message: bodyValidation.error.issues[0]?.message,
       });
     }
 
@@ -176,7 +176,7 @@ export async function cancelOrder(req: Request, res: Response) {
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Parâmetro inválido',
-        message: validationResult.error.issues[0]?.message || 'ID em formato inválido.',
+        message: validationResult.error.issues[0]?.message,
       });
     }
 
