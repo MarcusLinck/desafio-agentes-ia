@@ -20,6 +20,10 @@ export const swaggerDefinition = {
       name: 'Orders',
       description: 'Operações de CRUD, gerenciamento de status e cancelamento de pedidos',
     },
+    {
+      name: 'Products',
+      description: 'Consulta de produtos externos complementares (Fake Store API)',
+    },
   ],
   paths: {
     '/health': {
@@ -363,6 +367,121 @@ export const swaggerDefinition = {
           },
           500: {
             description: 'Erro interno ao processar cancelamento',
+          },
+        },
+      },
+    },
+    '/api/v1/external-products': {
+      get: {
+        summary: 'Lista todos os produtos externos',
+        description: 'Consome a Fake Store API e retorna o catálogo completo de produtos validados via Zod.',
+        tags: ['Products'],
+        responses: {
+          200: {
+            description: 'Lista de produtos externos recuperada com sucesso',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  source: 'Fake Store API (https://fakestoreapi.com)',
+                  total: 20,
+                  data: [
+                    {
+                      id: 1,
+                      title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
+                      price: 109.95,
+                      description: 'Your perfect pack for everyday use and walks in the forest...',
+                      category: "men's clothing",
+                      image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          503: {
+            description: 'Serviço de integração com a Fake Store API indisponível',
+            content: {
+              'application/json': {
+                example: {
+                  error: 'Serviço indisponível',
+                  message: 'A API externa de produtos está temporariamente indisponível.',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/v1/external-products/{id}': {
+      get: {
+        summary: 'Busca um produto externo pelo ID',
+        description: 'Retorna os detalhes de um único produto da Fake Store API utilizando o ID numérico.',
+        tags: ['Products'],
+        parameters: [
+          {
+            in: 'path',
+            name: 'id',
+            required: true,
+            schema: {
+              type: 'integer',
+            },
+            description: 'ID numérico do produto externo',
+            example: 1,
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Detalhes do produto recuperados com sucesso',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  source: 'Fake Store API (https://fakestoreapi.com)',
+                  data: {
+                    id: 1,
+                    title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
+                    price: 109.95,
+                    description: 'Your perfect pack for everyday use and walks in the forest...',
+                    category: "men's clothing",
+                    image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
+                  },
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Parâmetro de ID inválido',
+            content: {
+              'application/json': {
+                example: {
+                  error: 'Parâmetro inválido',
+                  message: 'O ID do produto deve ser um número válido.',
+                },
+              },
+            },
+          },
+          404: {
+            description: 'Produto não encontrado na API externa',
+            content: {
+              'application/json': {
+                example: {
+                  error: 'Produto não encontrado',
+                  message: 'Nenhum produto externo foi encontrado com o ID 999.',
+                },
+              },
+            },
+          },
+          503: {
+            description: 'Serviço indisponível ou erro no contrato de dados',
+            content: {
+              'application/json': {
+                example: {
+                  error: 'Serviço indisponível',
+                  message: 'Não foi possível validar o produto na base externa no momento.',
+                },
+              },
+            },
           },
         },
       },
