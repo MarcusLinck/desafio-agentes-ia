@@ -5,6 +5,7 @@ import { swaggerDefinition } from './lib/swagger';
 import { pinoHttp } from 'pino-http';
 import { logger } from './lib/logger';
 import orderRoutes from './routes/orderRoutes.js';
+import { productRoutes } from './routes/productRoutes';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDefinition));
 
 app.use('/api/v1', orderRoutes);
+app.use('/api/v1', productRoutes);
 
 app.get('/health', (_req: Request, res: Response) => {
   return res.json({ status: 'ok', message: 'AI agent running!' });
