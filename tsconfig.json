@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "lib": ["esnext"],
     "types": ["node"],
     
@@ -16,7 +16,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"]
