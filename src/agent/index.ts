@@ -4,9 +4,10 @@ import { LibSQLStore } from '@mastra/libsql';
 import { google } from '@ai-sdk/google';
 import type { MastraModelConfig } from '@mastra/core/llm';
 import { getOrderTool, cancelOrderTool, searchExternalProductsTool } from './tools';
+import { env } from '../env/index';
 
 const supportModel = google(
-  process.env.GEMINI_MODEL ?? 'gemini-3.1-flash-lite',
+  env.GEMINI_MODEL ?? 'gemini-3.1-flash-lite',
 ) as unknown as MastraModelConfig;
 
 export const supportAgent = new Agent({

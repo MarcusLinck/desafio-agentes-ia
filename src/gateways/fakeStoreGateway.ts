@@ -1,9 +1,10 @@
+import { env } from '../env/index';
 import axios from 'axios';
 import { logger } from '../lib/logger';
 import { fakeStoreProductSchema, fakeStoreProductArraySchema, FakeStoreProductDto } from '../validators/product.validator';
 import type { ProductRepository } from '../interfaces/product-repository';
 
-const FAKE_STORE_BASE_URL = process.env.FAKE_STORE_BASE_URL || 'https://fakestoreapi.com';
+const FAKE_STORE_BASE_URL = env.FAKE_STORE_BASE_URL || 'https://fakestoreapi.com';
 
 export class FakeStoreGateway implements ProductRepository {
   async getProducts(): Promise<FakeStoreProductDto[]> {
