@@ -1,14 +1,16 @@
 import { type Request, type Response } from 'express';
-import { prisma } from '../lib/prisma';
-import { orderIdParamSchema, createOrderSchema, updateOrderStatusSchema } from '../validators/order.validator';
+import { orderIdParamSchema, createOrderSchema, updateOrderStatusSchema } from '../../validators/order.validator';
+import { makeGetOrdersUseCase } from '../../use-cases/factories/make-get-orders-use-case';
+import { makeGetOrderByIdUseCase } from '../../use-cases/factories/make-get-order-by-id-use-case';
+import { makeCreateOrderUseCase } from '../../use-cases/factories/make-create-order-use-case';
+import { makeUpdateOrderStatusUseCase } from '../../use-cases/factories/make-update-order-status-use-case';
+import { makeCancelOrderUseCase } from '../../use-cases/factories/make-cancel-order-use-case';
 
 export async function getOrders(_req: Request, res: Response) {
   try {
-    const orders = await prisma.order.findMany({
-      include: { items: true },
-      orderBy: { createdAt: 'desc' },
-    });
-
+    const getOrdersUseCase = makeGetOrdersUseCase();
+    const orders = await getOrdersUseCase.execute();
+    
     return res.status(200).json({
       success: true,
       total: orders.length,
@@ -26,7 +28,6 @@ export async function getOrders(_req: Request, res: Response) {
 export async function getOrderById(req: Request, res: Response) {
   try {
     const validationResult = orderIdParamSchema.safeParse(req.params);
-
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Parâmetro inválido',
@@ -35,11 +36,8 @@ export async function getOrderById(req: Request, res: Response) {
     }
 
     const { id } = validationResult.data;
-
-    const order = await prisma.order.findUnique({
-      where: { id },
-      include: { items: true },
-    });
+    const getOrderByIdUseCase = makeGetOrderByIdUseCase();
+    const order = await getOrderByIdUseCase.execute(id);
 
     if (!order) {
       return res.status(404).json({
@@ -48,10 +46,7 @@ export async function getOrderById(req: Request, res: Response) {
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: order,
-    });
+    return res.status(200).json({ success: true, data: order });
   } catch (error) {
     console.error('Erro ao consultar pedido:', error);
     return res.status(500).json({
@@ -63,9 +58,7 @@ export async function getOrderById(req: Request, res: Response) {
 
 export async function createOrder(req: Request, res: Response) {
   try {
-
     const validationResult = createOrderSchema.safeParse(req.body);
-
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Dados inválidos',
@@ -77,29 +70,8 @@ export async function createOrder(req: Request, res: Response) {
       });
     }
 
-    const { customerName, items } = validationResult.data;
-
-    const totalAmount = items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    const order = await prisma.order.create({
-      data: {
-        customerName,
-        status: 'PROCESSING',
-        totalAmount,
-        items: {
-          create: items.map((item) => ({
-            productId: item.productId,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        },
-      },
-      include: { items: true },
-    });
+    const createOrderUseCase = makeCreateOrderUseCase();
+    const order = await createOrderUseCase.execute(validationResult.data);
 
     return res.status(201).json({
       success: true,
@@ -118,7 +90,6 @@ export async function createOrder(req: Request, res: Response) {
 export async function updateOrderStatus(req: Request, res: Response) {
   try {
     const paramValidation = orderIdParamSchema.safeParse(req.params);
-
     if (!paramValidation.success) {
       return res.status(400).json({
         error: 'Parâmetro inválido',
@@ -127,7 +98,6 @@ export async function updateOrderStatus(req: Request, res: Response) {
     }
 
     const bodyValidation = updateOrderStatusSchema.safeParse(req.body);
-
     if (!bodyValidation.success) {
       return res.status(400).json({
         error: 'Status inválido',
@@ -138,10 +108,8 @@ export async function updateOrderStatus(req: Request, res: Response) {
     const { id } = paramValidation.data;
     const { status } = bodyValidation.data;
 
-    const existingOrder = await prisma.order.findUnique({
-      where: { id },
-    });
-
+    const getOrderByIdUseCase = makeGetOrderByIdUseCase();
+    const existingOrder = await getOrderByIdUseCase.execute(id);
     if (!existingOrder) {
       return res.status(400).json({
         error: 'Pedido não encontrado',
@@ -149,11 +117,8 @@ export async function updateOrderStatus(req: Request, res: Response) {
       });
     }
 
-    const updatedOrder = await prisma.order.update({
-      where: { id },
-      data: { status },
-      include: { items: true },
-    });
+    const updateOrderStatusUseCase = makeUpdateOrderStatusUseCase();
+    const updatedOrder = await updateOrderStatusUseCase.execute(id, status);
 
     return res.status(200).json({
       success: true,
@@ -172,7 +137,6 @@ export async function updateOrderStatus(req: Request, res: Response) {
 export async function cancelOrder(req: Request, res: Response) {
   try {
     const validationResult = orderIdParamSchema.safeParse(req.params);
-
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Parâmetro inválido',
@@ -181,36 +145,29 @@ export async function cancelOrder(req: Request, res: Response) {
     }
 
     const { id } = validationResult.data;
+    const cancelOrderUseCase = makeCancelOrderUseCase();
+    const result = await cancelOrderUseCase.execute(id);
 
-    const order = await prisma.order.findUnique({
-      where: { id },
-    });
-
-    if (!order) {
-      return res.status(404).json({
-        error: 'Pedido não encontrado',
-        message: `Não foi encontrado nenhum pedido com o ID ${id} para cancelamento.`,
-      });
+    if (!result.success) {
+      if (result.reason === 'NOT_FOUND') {
+        return res.status(404).json({
+          error: 'Pedido não encontrado',
+          message: `Não foi encontrado nenhum pedido com o ID ${id} para cancelamento.`,
+        });
+      }
+      if (result.reason === 'INVALID_STATUS') {
+        return res.status(400).json({
+          error: 'Pedido não cancelável',
+          currentStatus: result.currentStatus,
+          message: `O pedido ${id} não pode mais ser cancelado pois encontra-se no status '${result.currentStatus}'. Apenas pedidos em processamento ('PROCESSING') permitem cancelamento automatizado.`,
+        });
+      }
     }
-
-    if (order.status !== 'PROCESSING') {
-      return res.status(400).json({
-        error: 'Pedido não cancelável',
-        currentStatus: order.status,
-        message: `O pedido ${id} não pode mais ser cancelado pois encontra-se no status '${order.status}'. Apenas pedidos em processamento ('PROCESSING') permitem cancelamento automatizado.`,
-      });
-    }
-
-    const updatedOrder = await prisma.order.update({
-      where: { id },
-      data: { status: 'CANCELLED' },
-      include: { items: true },
-    });
 
     return res.status(200).json({
       success: true,
       message: `Pedido ${id} cancelado com sucesso.`,
-      data: updatedOrder,
+      data: (result as any).order,
     });
   } catch (error) {
     console.error('Erro ao cancelar pedido:', error);

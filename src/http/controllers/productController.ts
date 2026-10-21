@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
-import { FakeStoreService } from '../services/fakeStoreService';
+import { makeGetProductsUseCase } from '../../use-cases/factories/make-get-products-use-case';
+import { makeGetProductByIdUseCase } from '../../use-cases/factories/make-get-product-by-id-use-case';
 
 export async function getExternalProducts(_req: Request, res: Response) {
   try {
-    const products = await FakeStoreService.getProducts();
+    const getProductsUseCase = makeGetProductsUseCase();
+    const products = await getProductsUseCase.execute();
+
     return res.status(200).json({
       success: true,
       source: 'Fake Store API (https://fakestoreapi.com)',
@@ -30,7 +33,8 @@ export async function getExternalProductById(req: Request, res: Response) {
       });
     }
 
-    const product = await FakeStoreService.getProductById(productId);
+    const getProductByIdUseCase = makeGetProductByIdUseCase();
+    const product = await getProductByIdUseCase.execute(productId);
 
     if (!product) {
       return res.status(404).json({

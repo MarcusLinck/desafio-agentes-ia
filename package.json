@@ -17,6 +17,11 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@ai-sdk/google": "^4.0.100",
+    "@mastra/core": "^1.78.0",
+    "@mastra/google": "^1.0.0",
+    "@mastra/libsql": "^1.26.2",
+    "@mastra/memory": "^1.38.0",
     "@prisma/client": "^5.22.0",
     "axios": "^1.20.0",
     "cors": "^2.8.6",
