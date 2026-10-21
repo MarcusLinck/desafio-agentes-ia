@@ -4,6 +4,7 @@ import { logger } from '../lib/logger';
 import { makeCancelOrderUseCase } from '../use-cases/factories/make-cancel-order-use-case';
 import { makeGetOrderByIdUseCase } from '../use-cases/factories/make-get-order-by-id-use-case';
 import { makeGetProductByIdUseCase } from '../use-cases/factories/make-get-product-by-id-use-case';
+import { OrderNotFoundError, InvalidOrderStatusError, ProductNotFoundError } from '../use-cases/errors';
 
 export const getOrderTool = createTool({
   id: 'get-order',
@@ -16,14 +17,17 @@ export const getOrderTool = createTool({
     
     const getOrderByIdUseCase = makeGetOrderByIdUseCase();
 
-    const order = await getOrderByIdUseCase.execute(orderId);
-
-    if (!order) {
-      logger.warn({ orderId }, 'Pedido não encontrado pela ferramenta do agente');
-      return { success: false, message: 'Pedido não encontrado.' };
+    try {
+      const order = await getOrderByIdUseCase.execute(orderId);
+      return { success: true, order };
+    } catch (error) {
+      if (error instanceof OrderNotFoundError) {
+        logger.warn({ orderId }, 'Pedido não encontrado pela ferramenta do agente');
+        return { success: false, message: 'Pedido não encontrado.' };
+      }
+      logger.error({ orderId, error }, 'Erro ao buscar pedido pela ferramenta do agente');
+      return { success: false, message: 'Erro interno ao consultar pedido.' };
     }
-
-    return { success: true, order };
   },
 });
 
@@ -34,8 +38,25 @@ export const cancelOrderTool = createTool({
   execute: async ({ orderId }) => {
     logger.info({ orderId }, 'Agente executou ferramenta: cancel-order');
     const cancelOrderUseCase = makeCancelOrderUseCase();
-    const result = await cancelOrderUseCase.execute(orderId);
-    return result;
+    
+    try {
+      const order = await cancelOrderUseCase.execute(orderId);
+      return { success: true, order };
+    } catch (error) {
+      if (error instanceof OrderNotFoundError) {
+        logger.warn({ orderId }, 'Pedido não encontrado para cancelamento pela ferramenta do agente');
+        return { success: false, message: 'Pedido não encontrado.' };
+      }
+      if (error instanceof InvalidOrderStatusError) {
+        logger.warn({ orderId, currentStatus: error.currentStatus }, 'Tentativa de cancelar pedido com status inválido');
+        return { 
+          success: false, 
+          message: `O pedido não pode ser cancelado pois encontra-se no status '${error.currentStatus}'. Apenas pedidos em processamento ('PROCESSING') permitem cancelamento.` 
+        };
+      }
+      logger.error({ orderId, error }, 'Erro ao cancelar pedido pela ferramenta do agente');
+      return { success: false, message: 'Erro interno ao cancelar pedido.' };
+    }
   },
 });
 
@@ -50,15 +71,19 @@ export const searchExternalProductsTool = createTool({
 
     const getProductByIdUseCase = makeGetProductByIdUseCase();
 
-    const product = await getProductByIdUseCase.execute(productId);
-
-    if (!product) {
-      return { success: false, message: 'Produto não encontrado na base externa.' };
+    try {
+      const product = await getProductByIdUseCase.execute(productId);
+      return {
+        success: true,
+        product: product,
+      };
+    } catch (error) {
+      if (error instanceof ProductNotFoundError) {
+        logger.warn({ productId }, 'Produto não encontrado na base externa pela ferramenta do agente');
+        return { success: false, message: 'Produto não encontrado na base externa.' };
+      }
+      logger.error({ productId, error }, 'Erro ao buscar produto na base externa pela ferramenta do agente');
+      return { success: false, message: 'Erro interno ao buscar produto na base externa.' };
     }
-
-    return {
-      success: true,
-      product: product,
-    };
   },
 });

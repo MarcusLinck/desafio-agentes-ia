@@ -1,5 +1,6 @@
 import type { OrderRepository } from '../interfaces/order-repository';
 import { logger } from '../lib/logger';
+import { OrderNotFoundError, InvalidOrderStatusError } from './errors';
 
 export class CancelOrderUseCase {
   constructor(private orderRepository: OrderRepository) {}
@@ -10,14 +11,13 @@ export class CancelOrderUseCase {
     const order = await this.orderRepository.findById(id);
 
     if (!order) {
-      return { success: false, reason: 'NOT_FOUND' as const };
+      throw new OrderNotFoundError(id);
     }
 
     if (order.status !== 'PROCESSING') {
-      return { success: false, reason: 'INVALID_STATUS' as const, currentStatus: order.status };
+      throw new InvalidOrderStatusError(order.status);
     }
 
-    const updatedOrder = await this.orderRepository.updateStatus(id, 'CANCELLED');
-    return { success: true, order: updatedOrder };
+    return await this.orderRepository.updateStatus(id, 'CANCELLED');
   }
 }

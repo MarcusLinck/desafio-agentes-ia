@@ -5,6 +5,7 @@ import { makeGetOrderByIdUseCase } from '../../use-cases/factories/make-get-orde
 import { makeCreateOrderUseCase } from '../../use-cases/factories/make-create-order-use-case';
 import { makeUpdateOrderStatusUseCase } from '../../use-cases/factories/make-update-order-status-use-case';
 import { makeCancelOrderUseCase } from '../../use-cases/factories/make-cancel-order-use-case';
+import { OrderNotFoundError, InvalidOrderStatusError } from '../../use-cases/errors';
 
 export async function getOrders(_req: Request, res: Response) {
   try {
@@ -26,28 +27,28 @@ export async function getOrders(_req: Request, res: Response) {
 }
 
 export async function getOrderById(req: Request, res: Response) {
-  try {
-    const validationResult = orderIdParamSchema.safeParse(req.params);
-    if (!validationResult.success) {
-      return res.status(400).json({
-        error: 'Parâmetro inválido',
-        message: validationResult.error.issues[0]?.message,
-      });
-    }
+  const validationResult = orderIdParamSchema.safeParse(req.params);
+  if (!validationResult.success) {
+    return res.status(400).json({
+      error: 'Parâmetro inválido',
+      message: validationResult.error.issues[0]?.message,
+    });
+  }
 
-    const { id } = validationResult.data;
+  const { id } = validationResult.data;
+
+  try {
     const getOrderByIdUseCase = makeGetOrderByIdUseCase();
     const order = await getOrderByIdUseCase.execute(id);
 
-    if (!order) {
+    return res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    if (error instanceof OrderNotFoundError) {
       return res.status(404).json({
         error: 'Pedido não encontrado',
         message: `Não foi encontrado nenhum pedido com o ID ${id}.`,
       });
     }
-
-    return res.status(200).json({ success: true, data: order });
-  } catch (error) {
     console.error('Erro ao consultar pedido:', error);
     return res.status(500).json({
       error: 'Erro técnico',
@@ -71,7 +72,13 @@ export async function createOrder(req: Request, res: Response) {
     }
 
     const createOrderUseCase = makeCreateOrderUseCase();
-    const order = await createOrderUseCase.execute(validationResult.data);
+    const order = await createOrderUseCase.execute({
+      ...validationResult.data,
+      totalAmount: validationResult.data.items.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      ),
+    });
 
     return res.status(201).json({
       success: true,
@@ -88,35 +95,26 @@ export async function createOrder(req: Request, res: Response) {
 }
 
 export async function updateOrderStatus(req: Request, res: Response) {
+  const paramValidation = orderIdParamSchema.safeParse(req.params);
+  if (!paramValidation.success) {
+    return res.status(400).json({
+      error: 'Parâmetro inválido',
+      message: paramValidation.error.issues[0]?.message,
+    });
+  }
+
+  const bodyValidation = updateOrderStatusSchema.safeParse(req.body);
+  if (!bodyValidation.success) {
+    return res.status(400).json({
+      error: 'Status inválido',
+      message: bodyValidation.error.issues[0]?.message,
+    });
+  }
+
+  const { id } = paramValidation.data;
+  const { status } = bodyValidation.data;
+
   try {
-    const paramValidation = orderIdParamSchema.safeParse(req.params);
-    if (!paramValidation.success) {
-      return res.status(400).json({
-        error: 'Parâmetro inválido',
-        message: paramValidation.error.issues[0]?.message,
-      });
-    }
-
-    const bodyValidation = updateOrderStatusSchema.safeParse(req.body);
-    if (!bodyValidation.success) {
-      return res.status(400).json({
-        error: 'Status inválido',
-        message: bodyValidation.error.issues[0]?.message,
-      });
-    }
-
-    const { id } = paramValidation.data;
-    const { status } = bodyValidation.data;
-
-    const getOrderByIdUseCase = makeGetOrderByIdUseCase();
-    const existingOrder = await getOrderByIdUseCase.execute(id);
-    if (!existingOrder) {
-      return res.status(400).json({
-        error: 'Pedido não encontrado',
-        message: `Não foi encontrado nenhum pedido com o ID ${id}.`,
-      });
-    }
-
     const updateOrderStatusUseCase = makeUpdateOrderStatusUseCase();
     const updatedOrder = await updateOrderStatusUseCase.execute(id, status);
 
@@ -126,6 +124,12 @@ export async function updateOrderStatus(req: Request, res: Response) {
       data: updatedOrder,
     });
   } catch (error) {
+    if (error instanceof OrderNotFoundError) {
+      return res.status(404).json({
+        error: 'Pedido não encontrado',
+        message: `Não foi encontrado nenhum pedido com o ID ${id}.`,
+      });
+    }
     console.error('Erro ao atualizar status do pedido:', error);
     return res.status(500).json({
       error: 'Erro técnico',
@@ -135,41 +139,39 @@ export async function updateOrderStatus(req: Request, res: Response) {
 }
 
 export async function cancelOrder(req: Request, res: Response) {
+  const validationResult = orderIdParamSchema.safeParse(req.params);
+  if (!validationResult.success) {
+    return res.status(400).json({
+      error: 'Parâmetro inválido',
+      message: validationResult.error.issues[0]?.message,
+    });
+  }
+
+  const { id } = validationResult.data;
+
   try {
-    const validationResult = orderIdParamSchema.safeParse(req.params);
-    if (!validationResult.success) {
-      return res.status(400).json({
-        error: 'Parâmetro inválido',
-        message: validationResult.error.issues[0]?.message,
-      });
-    }
-
-    const { id } = validationResult.data;
     const cancelOrderUseCase = makeCancelOrderUseCase();
-    const result = await cancelOrderUseCase.execute(id);
-
-    if (!result.success) {
-      if (result.reason === 'NOT_FOUND') {
-        return res.status(404).json({
-          error: 'Pedido não encontrado',
-          message: `Não foi encontrado nenhum pedido com o ID ${id} para cancelamento.`,
-        });
-      }
-      if (result.reason === 'INVALID_STATUS') {
-        return res.status(400).json({
-          error: 'Pedido não cancelável',
-          currentStatus: result.currentStatus,
-          message: `O pedido ${id} não pode mais ser cancelado pois encontra-se no status '${result.currentStatus}'. Apenas pedidos em processamento ('PROCESSING') permitem cancelamento automatizado.`,
-        });
-      }
-    }
+    const order = await cancelOrderUseCase.execute(id);
 
     return res.status(200).json({
       success: true,
       message: `Pedido ${id} cancelado com sucesso.`,
-      data: (result as any).order,
+      data: order,
     });
   } catch (error) {
+    if (error instanceof OrderNotFoundError) {
+      return res.status(404).json({
+        error: 'Pedido não encontrado',
+        message: `Não foi encontrado nenhum pedido com o ID ${id} para cancelamento.`,
+      });
+    }
+    if (error instanceof InvalidOrderStatusError) {
+      return res.status(400).json({
+        error: 'Pedido não cancelável',
+        currentStatus: error.currentStatus,
+        message: `O pedido ${id} não pode mais ser cancelado pois encontra-se no status '${error.currentStatus}'. Apenas pedidos em processamento ('PROCESSING') permitem cancelamento automatizado.`,
+      });
+    }
     console.error('Erro ao cancelar pedido:', error);
     return res.status(500).json({
       error: 'Erro técnico',
