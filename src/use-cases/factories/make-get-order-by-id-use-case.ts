@@ -1,5 +1,5 @@
-import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository';
-import { GetOrderByIdUseCase } from '../get-order-by-id';
+import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository.js';
+import { GetOrderByIdUseCase } from '../get-order-by-id.js';
 
 export function makeGetOrderByIdUseCase() {
   const orderRepository = new PrismaOrderRepository();

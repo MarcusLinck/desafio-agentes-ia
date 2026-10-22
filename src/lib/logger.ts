@@ -1,4 +1,4 @@
-import { env } from '../env/index';
+import { env } from '../env/index.js';
 import pino from 'pino';
 
 const isProduction = env.NODE_ENV === 'production';

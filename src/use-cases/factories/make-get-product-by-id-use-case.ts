@@ -1,5 +1,5 @@
-import { FakeStoreGateway } from '../../gateways/fakeStoreGateway';
-import { GetProductByIdUseCase } from '../get-product-by-id';
+import { FakeStoreGateway } from '../../gateways/fakeStoreGateway.js';
+import { GetProductByIdUseCase } from '../get-product-by-id.js';
 
 export function makeGetProductByIdUseCase() {
   const productProvider = new FakeStoreGateway();

@@ -1,6 +1,6 @@
-import type { OrderRepository } from '../interfaces/order-repository';
-import { logger } from '../lib/logger';
-import { OrderNotFoundError } from './errors';
+import type { OrderRepository } from '../interfaces/order-repository.js';
+import { logger } from '../lib/logger.js';
+import { OrderNotFoundError } from './errors/index.js';
 
 export class GetOrderByIdUseCase {
   constructor(private orderRepository: OrderRepository) {}

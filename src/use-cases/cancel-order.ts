@@ -1,6 +1,6 @@
-import type { OrderRepository } from '../interfaces/order-repository';
-import { logger } from '../lib/logger';
-import { OrderNotFoundError, InvalidOrderStatusError } from './errors';
+import type { OrderRepository } from '../interfaces/order-repository.js';
+import { logger } from '../lib/logger.js';
+import { OrderNotFoundError, InvalidOrderStatusError } from './errors/index.js';
 
 export class CancelOrderUseCase {
   constructor(private orderRepository: OrderRepository) {}

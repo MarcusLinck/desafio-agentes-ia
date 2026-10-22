@@ -3,8 +3,8 @@ import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { google } from '@ai-sdk/google';
 import type { MastraModelConfig } from '@mastra/core/llm';
-import { getOrderTool, cancelOrderTool, searchExternalProductsTool } from './tools';
-import { env } from '../env/index';
+import { getOrderTool, cancelOrderTool, searchExternalProductsTool } from './tools.js';
+import { env } from '../env/index.js';
 
 const supportModel = google(
   env.GEMINI_MODEL ?? 'gemini-3.1-flash-lite',

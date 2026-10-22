@@ -1,5 +1,5 @@
-import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository';
-import { CreateOrderUseCase } from '../create-order';
+import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository.js';
+import { CreateOrderUseCase } from '../create-order.js';
 
 export function makeCreateOrderUseCase() {
   const orderRepository = new PrismaOrderRepository();

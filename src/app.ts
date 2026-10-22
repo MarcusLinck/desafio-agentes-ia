@@ -1,12 +1,12 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerDefinition } from './lib/swagger';
+import { swaggerDefinition } from './lib/swagger.js';
 import { pinoHttp } from 'pino-http';
-import { logger } from './lib/logger';
+import { logger } from './lib/logger.js';
 import orderRoutes from './http/routes/orderRoutes.js';
-import { productRoutes } from './http/routes/productRoutes';
-import agentRoutes from './http/routes/agentRoutes';
+import { productRoutes } from './http/routes/productRoutes.js';
+import agentRoutes from './http/routes/agentRoutes.js';
 
 const app = express();
 

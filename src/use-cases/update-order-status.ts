@@ -1,7 +1,7 @@
-import type { OrderRepository } from '../interfaces/order-repository';
-import { logger } from '../lib/logger';
+import type { OrderRepository } from '../interfaces/order-repository.js';
+import { logger } from '../lib/logger.js';
 import type { OrderStatus } from '@prisma/client';
-import { OrderNotFoundError } from './errors';
+import { OrderNotFoundError } from './errors/index.js';
 
 export class UpdateOrderStatusUseCase {
   constructor(private orderRepository: OrderRepository) {}

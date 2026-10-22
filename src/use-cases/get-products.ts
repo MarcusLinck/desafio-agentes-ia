@@ -1,5 +1,5 @@
-import type { ProductRepository } from '../interfaces/product-repository';
-import { logger } from '../lib/logger';
+import type { ProductRepository } from '../interfaces/product-repository.js';
+import { logger } from '../lib/logger.js';
 
 export class GetProductsUseCase {
   constructor(private productProvider: ProductRepository) {}

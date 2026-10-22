@@ -1,8 +1,8 @@
-import { env } from '../env/index';
+import { env } from '../env/index.js';
 import axios from 'axios';
-import { logger } from '../lib/logger';
-import { fakeStoreProductSchema, fakeStoreProductArraySchema, FakeStoreProductDto } from '../validators/product.validator';
-import type { ProductRepository } from '../interfaces/product-repository';
+import { logger } from '../lib/logger.js';
+import { fakeStoreProductSchema, fakeStoreProductArraySchema, FakeStoreProductDto } from '../validators/product.validator.js';
+import type { ProductRepository } from '../interfaces/product-repository.js';
 
 const FAKE_STORE_BASE_URL = env.FAKE_STORE_BASE_URL || 'https://fakestoreapi.com';
 

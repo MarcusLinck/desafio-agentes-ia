@@ -1,5 +1,5 @@
-import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository';
-import { UpdateOrderStatusUseCase } from '../update-order-status';
+import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository.js';
+import { UpdateOrderStatusUseCase } from '../update-order-status.js';
 
 export function makeUpdateOrderStatusUseCase() {
   const orderRepository = new PrismaOrderRepository();

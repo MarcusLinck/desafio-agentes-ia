@@ -1,6 +1,6 @@
-import type { ProductRepository } from '../interfaces/product-repository';
-import { logger } from '../lib/logger';
-import { ProductNotFoundError } from './errors';
+import type { ProductRepository } from '../interfaces/product-repository.js';
+import { logger } from '../lib/logger.js';
+import { ProductNotFoundError } from './errors/index.js';
 
 export class GetProductByIdUseCase {
   constructor(private productProvider: ProductRepository) {}

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { makeGetProductsUseCase } from '../../use-cases/factories/make-get-products-use-case';
-import { makeGetProductByIdUseCase } from '../../use-cases/factories/make-get-product-by-id-use-case';
-import { ProductNotFoundError } from '../../use-cases/errors';
+import { makeGetProductsUseCase } from '../../use-cases/factories/make-get-products-use-case.js';
+import { makeGetProductByIdUseCase } from '../../use-cases/factories/make-get-product-by-id-use-case.js';
+import { ProductNotFoundError } from '../../use-cases/errors/index.js';
 
 export async function getExternalProducts(_req: Request, res: Response) {
   try {

@@ -1,6 +1,6 @@
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import type { Order, OrderStatus } from '@prisma/client';
-import type { OrderRepository, CreateOrderInput } from '../interfaces/order-repository';
+import type { OrderRepository, CreateOrderInput } from '../interfaces/order-repository.js';
 
 export class PrismaOrderRepository implements OrderRepository {
   async findAll(): Promise<Order[]> {

@@ -1,5 +1,5 @@
-import type { OrderRepository } from '../interfaces/order-repository';
-import { logger } from '../lib/logger';
+import type { OrderRepository } from '../interfaces/order-repository.js';
+import { logger } from '../lib/logger.js';
 
 export class GetOrdersUseCase {
   constructor(private orderRepository: OrderRepository) {}

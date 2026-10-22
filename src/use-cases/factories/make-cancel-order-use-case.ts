@@ -1,5 +1,5 @@
-import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository';
-import { CancelOrderUseCase } from '../cancel-order';
+import { PrismaOrderRepository } from '../../repositories/prismaOrderRepository.js';
+import { CancelOrderUseCase } from '../cancel-order.js';
 
 export function makeCancelOrderUseCase() {
   const orderRepository = new PrismaOrderRepository();

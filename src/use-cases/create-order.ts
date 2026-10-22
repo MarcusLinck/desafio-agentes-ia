@@ -1,6 +1,6 @@
 import { Order } from '@prisma/client';
-import type { OrderRepository, CreateOrderInput } from '../interfaces/order-repository';
-import { logger } from '../lib/logger';
+import type { OrderRepository, CreateOrderInput } from '../interfaces/order-repository.js';
+import { logger } from '../lib/logger.js';
 
 export class CreateOrderUseCase {
   constructor(private orderRepository: OrderRepository) {}

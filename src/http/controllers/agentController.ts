@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { supportAgent } from '../../agent';
+import { supportAgent } from '../../agent/index.js';
 
 export async function handleAgentChat(req: Request, res: Response) {
   try {

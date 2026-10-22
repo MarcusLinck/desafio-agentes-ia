@@ -1,10 +1,10 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { logger } from '../lib/logger';
-import { makeCancelOrderUseCase } from '../use-cases/factories/make-cancel-order-use-case';
-import { makeGetOrderByIdUseCase } from '../use-cases/factories/make-get-order-by-id-use-case';
-import { makeGetProductByIdUseCase } from '../use-cases/factories/make-get-product-by-id-use-case';
-import { OrderNotFoundError, InvalidOrderStatusError, ProductNotFoundError } from '../use-cases/errors';
+import { logger } from '../lib/logger.js';
+import { makeCancelOrderUseCase } from '../use-cases/factories/make-cancel-order-use-case.js';
+import { makeGetOrderByIdUseCase } from '../use-cases/factories/make-get-order-by-id-use-case.js';
+import { makeGetProductByIdUseCase } from '../use-cases/factories/make-get-product-by-id-use-case.js';
+import { OrderNotFoundError, InvalidOrderStatusError, ProductNotFoundError } from '../use-cases/errors/index.js';
 
 export const getOrderTool = createTool({
   id: 'get-order',

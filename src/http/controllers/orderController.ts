@@ -1,11 +1,11 @@
 import { type Request, type Response } from 'express';
-import { orderIdParamSchema, createOrderSchema, updateOrderStatusSchema } from '../../validators/order.validator';
-import { makeGetOrdersUseCase } from '../../use-cases/factories/make-get-orders-use-case';
-import { makeGetOrderByIdUseCase } from '../../use-cases/factories/make-get-order-by-id-use-case';
-import { makeCreateOrderUseCase } from '../../use-cases/factories/make-create-order-use-case';
-import { makeUpdateOrderStatusUseCase } from '../../use-cases/factories/make-update-order-status-use-case';
-import { makeCancelOrderUseCase } from '../../use-cases/factories/make-cancel-order-use-case';
-import { OrderNotFoundError, InvalidOrderStatusError } from '../../use-cases/errors';
+import { orderIdParamSchema, createOrderSchema, updateOrderStatusSchema } from '../../validators/order.validator.js';
+import { makeGetOrdersUseCase } from '../../use-cases/factories/make-get-orders-use-case.js';
+import { makeGetOrderByIdUseCase } from '../../use-cases/factories/make-get-order-by-id-use-case.js';
+import { makeCreateOrderUseCase } from '../../use-cases/factories/make-create-order-use-case.js';
+import { makeUpdateOrderStatusUseCase } from '../../use-cases/factories/make-update-order-status-use-case.js';
+import { makeCancelOrderUseCase } from '../../use-cases/factories/make-cancel-order-use-case.js';
+import { OrderNotFoundError, InvalidOrderStatusError } from '../../use-cases/errors/index.js';
 
 export async function getOrders(_req: Request, res: Response) {
   try {
