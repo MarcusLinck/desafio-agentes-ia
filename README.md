@@ -177,33 +177,23 @@ GEMINI_MODEL=gemini-3.6-flash
 ### Desenvolvimento Local
 
 ```bash
-# Instalar dependências
-pnpm install
+# Faça uma cópia do arquivo .env.example
+cp .env.example .env
+# Abra o arquivo .env gerado e preencha sua GOOGLE_GENERATIVE_AI_API_KEY
 
-# Configurar banco de dados
+# Instalar dependências
+pnpm install --ignore-scripts
+# usado --ignore-scripts para evitar o bloqueio do Mastra
+
+# Suba o banco de dados PostgreSQL via Docker:
+pnpm docker:up
+
+# Configure o banco de dados (migrações e seed):
 pnpm db:setup
-# Ou separadamente:
-pnpm db:migrate
-pnpm db:seed
 
 # Iniciar em modo desenvolvimento (hot reload)
 pnpm dev
 ```
-
-### Com Docker (Recomendado)
-
-```bash
-# Subir tudo (app + postgres)
-pnpm docker:up
-
-# Ver logs
-pnpm docker:logs
-
-# Parar e remover volumes
-pnpm docker:down
-```
-
-> **Nota:** Para o Docker, a `GOOGLE_GENERATIVE_AI_API_KEY` deve ser passada como variável de ambiente ou configurada no `.env` que será injetado no container.
 
 ---
 
