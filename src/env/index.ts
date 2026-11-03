@@ -13,6 +13,9 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
 });
 
+// Campos que devem ser redigidos dos logs (nunca exponha chaves de API, segredos)
+const REDACT_FIELDS = ['GOOGLE_GENERATIVE_AI_API_KEY'];
+
 const _env = envSchema.safeParse(process.env);
 
 if (_env.success === false) {
@@ -20,5 +23,8 @@ if (_env.success === false) {
 
   throw new Error('Falha na inicialização: Variáveis de ambiente inválidas.');
 }
+
+// Configura redaction global no processo para evitar vazamento acidental
+process.env.REDACT_FIELDS = REDACT_FIELDS.join(',');
 
 export const env = _env.data;

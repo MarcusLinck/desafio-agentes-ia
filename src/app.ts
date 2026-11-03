@@ -13,6 +13,13 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
+// Handle unhandled rejections para evitar queda silenciosa do processo
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({ reason, promise }, 'Rejeição de promise não tratada - shutting down in 30s');
+  // Graceful shutdown after logging
+  setTimeout(() => process.exit(1), 30000);
+});
+
 app.use(helmet());
 
 app.use(cors({
