@@ -37,6 +37,9 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./:/app:ro
+      - .env:/app/.env:ro
 
 volumes:
   pgdata:
