@@ -53,5 +53,12 @@
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^5.0.5"
+  },
+  "resolutions": {
+    "next": ">=15.5.28",
+    "zod": ">=4.6.7",
+    "body-parser": ">=2.4.0",
+    "postcss": ">=8.5.18",
+    "follow-redirects": ">=1.16.2"
   }
 }
