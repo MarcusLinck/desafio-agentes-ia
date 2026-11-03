@@ -86,13 +86,6 @@ app.use(pinoHttp({ logger }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDefinition));
 
-app.use('/api/v1', orderRoutes);
-app.use('/api/v1', productRoutes);
-app.use('/api/v1', agentRoutes);
-
-app.use(notFoundHandler);
-app.use(errorHandler);
-
 app.get('/health', (_req: Request, res: Response) => {
   return res.status(200).json({
     status: 'healthy',
@@ -101,5 +94,12 @@ app.get('/health', (_req: Request, res: Response) => {
     message: 'AI agent running!'
   });
 });
+
+app.use('/api/v1', orderRoutes);
+app.use('/api/v1', productRoutes);
+app.use('/api/v1', agentRoutes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
