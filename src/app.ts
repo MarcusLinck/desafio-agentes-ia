@@ -31,6 +31,20 @@ const limiter = rateLimit({
   message: {
     status: 'error',
     message: 'Muitas requisições originadas deste IP, tente novamente mais tarde.'
+  },
+  handler: (req, res, options) => {
+    logger.warn({
+      message: 'Limite de requisições excedido',
+      ip: req.ip,
+      route: req.url,
+      method: req.method,
+      userAgent: req.get('User-Agent'),
+      ...options
+    }, 'Rate limit excedido');
+    res.status(429).json({
+      status: 'error',
+      message: 'Muitas requisições originadas deste IP, tente novamente mais tarde.'
+    });
   }
 });
 app.use(limiter);
