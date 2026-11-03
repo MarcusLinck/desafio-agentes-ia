@@ -20,7 +20,33 @@ process.on('unhandledRejection', (reason, promise) => {
   setTimeout(() => process.exit(1), 30000);
 });
 
-app.use(helmet());
+// Configuração avançada de headers de segurança
+const securityHeaders = helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000, // 1 ano
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: {
+    policy: 'strict-origin-when-cross-origin',
+  },
+  noSniff: true,
+  xssFilter: true,
+});
+
+app.use(securityHeaders);
 
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:5173'],

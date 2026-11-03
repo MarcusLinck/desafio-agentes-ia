@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { supportAgent } from '../../agent/index.js';
 import { agentChatBodySchema } from '../../validators/product.validator.js';
 
+const generateSessionId = (): string => {
+  return 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+};
+
 export async function handleAgentChat(req: Request, res: Response) {
   const validationResult = agentChatBodySchema.safeParse(req.body);
 
@@ -13,12 +17,13 @@ export async function handleAgentChat(req: Request, res: Response) {
   }
 
   const { message, sessionId } = validationResult.data;
+  const effectiveSessionId = sessionId || generateSessionId();
 
   try {
     const result = await supportAgent.generate(message, {
       memory: {
-        thread: sessionId || 'default-thread',
-        resource: sessionId || 'default-customer',
+        thread: effectiveSessionId,
+        resource: effectiveSessionId,
       },
     });
 
