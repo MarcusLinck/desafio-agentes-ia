@@ -1,7 +1,7 @@
 import type { OrderRepository } from '../interfaces/order-repository.js';
 import { logger } from '../lib/logger.js';
 import type { OrderStatus } from '@prisma/client';
-import { OrderNotFoundError } from './errors/index.js';
+import { OrderNotFoundError, InvalidOrderStatusError } from './errors/index.js';
 
 export class UpdateOrderStatusUseCase {
   constructor(private orderRepository: OrderRepository) {}
@@ -13,6 +13,10 @@ export class UpdateOrderStatusUseCase {
     
     if (!order) {
       throw new OrderNotFoundError(id);
+    }
+    
+    if (order.status === 'CANCELLED') {
+      throw new InvalidOrderStatusError(order.status, ['PROCESSING', 'SHIPPED', 'DELIVERED']);
     }
     
     return await this.orderRepository.updateStatus(id, status);

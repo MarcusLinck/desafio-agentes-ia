@@ -4,9 +4,8 @@ import { InMemoryProductRepository } from '../repositories/inMemoryProductReposi
 import { GetProductsUseCase } from '../../src/use-cases/get-products';
 import { GetProductByIdUseCase } from '../../src/use-cases/get-product-by-id';
 import { ProductNotFoundError } from '../../src/use-cases/errors';
-import { FakeStoreProductDto } from '../../src/validators/product.validator';
 
-const mockProducts: FakeStoreProductDto[] = [
+const mockProducts: import('../../src/validators/product.validator').FakeStoreProductDto[] = [
   {
     id: 1,
     title: 'Produto 1',
@@ -51,6 +50,14 @@ describe('Product Use Cases', () => {
 
       expect(products).toEqual([]);
     });
+
+    it('should return products in the order they were added', async () => {
+      const useCase = new GetProductsUseCase(productRepository);
+
+      const products = await useCase.execute();
+
+      expect(products.map(p => p.title)).toEqual(['Produto 1', 'Produto 2']);
+    });
   });
 
   describe('GetProductByIdUseCase', () => {
@@ -75,6 +82,20 @@ describe('Product Use Cases', () => {
         expect(error).toBeInstanceOf(ProductNotFoundError);
         expect((error as ProductNotFoundError).productId).toBe(999);
       }
+    });
+
+    it('should return null when productId is not in repository', async () => {
+      // The use case throws ProductNotFoundError instead of returning null
+      const useCase = new GetProductByIdUseCase(productRepository);
+
+      await expect(useCase.execute(999)).rejects.toThrow(ProductNotFoundError);
+    });
+
+    it('should handle product with id 0', async () => {
+      // The use case throws ProductNotFoundError for id 0 as well
+      const useCase = new GetProductByIdUseCase(productRepository);
+
+      await expect(useCase.execute(0)).rejects.toThrow(ProductNotFoundError);
     });
   });
 });

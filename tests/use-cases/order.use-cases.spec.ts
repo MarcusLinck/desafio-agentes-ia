@@ -35,7 +35,7 @@ describe('Order Use Cases', () => {
       expect(order.status).toBe('PROCESSING');
     });
 
-    it('should calculate total amount correctly', async () => {
+    it('should calculate total amount correctly (items * price * quantity)', async () => {
       const useCase = new CreateOrderUseCase(orderRepository);
 
       const input = {
@@ -48,6 +48,31 @@ describe('Order Use Cases', () => {
       const order = await useCase.execute({ ...input, totalAmount: 300 });
 
       expect(order.totalAmount).toBe(300);
+    });
+
+    it('should throw error when items array is empty', async () => {
+      const useCase = new CreateOrderUseCase(orderRepository);
+
+      await expect(
+        useCase.execute({ customerName: 'Sem Itens', items: [] } as any, 0)
+      ).rejects.toThrow();
+    });
+
+    it('should calculate total correctly with multiple items', async () => {
+      const useCase = new CreateOrderUseCase(orderRepository);
+
+      const input = {
+        customerName: 'Teste Multiplo',
+        items: [
+          { productId: 1, title: 'P1', price: 10, quantity: 2 },
+          { productId: 2, title: 'P2', price: 25.5, quantity: 1 },
+          { productId: 3, title: 'P3', price: 7.5, quantity: 4 },
+        ],
+      };
+
+      const order = await useCase.execute({ ...input, totalAmount: 75.5 });
+
+      expect(order.totalAmount).toBe(75.5);
     });
   });
 
@@ -65,6 +90,19 @@ describe('Order Use Cases', () => {
 
       expect(order.id).toBe(created.id);
       expect(order.customerName).toBe('Teste');
+    });
+
+    it('should throw OrderNotFoundError when order does not exist', async () => {
+      const useCase = new GetOrderByIdUseCase(orderRepository);
+
+      await expect(useCase.execute('non-existent-id')).rejects.toThrow(OrderNotFoundError);
+
+      try {
+        await useCase.execute('non-existent-id');
+      } catch (error) {
+        expect(error).toBeInstanceOf(OrderNotFoundError);
+        expect((error as OrderNotFoundError).orderId).toBe('non-existent-id');
+      }
     });
 
     it('should throw OrderNotFoundError when order does not exist', async () => {
@@ -113,6 +151,26 @@ describe('Order Use Cases', () => {
       expect(orders[0].customerName).toBe('Segundo');
       expect(orders[1].customerName).toBe('Primeiro');
     });
+
+    it('should return orders even when createdAt is same date', async () => {
+      const useCase = new GetOrdersUseCase(orderRepository);
+
+      await orderRepository.create({
+        customerName: 'Pedido A',
+        items: [{ productId: 1, title: 'Produto', price: 10, quantity: 1 }],
+        totalAmount: 10,
+      });
+
+      await orderRepository.create({
+        customerName: 'Pedido B',
+        items: [{ productId: 2, title: 'Produto', price: 20, quantity: 1 }],
+        totalAmount: 20,
+      });
+
+      const orders = await useCase.execute();
+
+      expect(orders).toHaveLength(2);
+    });
   });
 
   describe('UpdateOrderStatusUseCase', () => {
@@ -141,6 +199,29 @@ describe('Order Use Cases', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(OrderNotFoundError);
         expect((error as OrderNotFoundError).orderId).toBe('non-existent-id');
+      }
+    });
+
+    it('should throw InvalidOrderStatusError for order already CANCELLED', async () => {
+      const useCase = new UpdateOrderStatusUseCase(orderRepository);
+
+      const created = await orderRepository.create({
+        customerName: 'Teste',
+        items: [{ productId: 1, title: 'Produto', price: 10, quantity: 1 }],
+        totalAmount: 10,
+      });
+
+      // First cancel the order
+      await useCase.execute(created.id, 'CANCELLED');
+
+      // Now try to update a cancelled order - should throw
+      await expect(useCase.execute(created.id, 'DELIVERED')).rejects.toThrow(InvalidOrderStatusError);
+
+      try {
+        await useCase.execute(created.id, 'DELIVERED');
+      } catch (error) {
+        expect(error).toBeInstanceOf(InvalidOrderStatusError);
+        expect((error as InvalidOrderStatusError).currentStatus).toBe('CANCELLED');
       }
     });
   });
@@ -217,6 +298,21 @@ describe('Order Use Cases', () => {
           expect((error as InvalidOrderStatusError).currentStatus).toBe(status);
         }
       }
+    });
+
+    it('should work with freshly created order in PROCESSING status', async () => {
+      const useCase = new CancelOrderUseCase(orderRepository);
+
+      const created = await orderRepository.create({
+        customerName: 'Novo Pedido',
+        items: [{ productId: 1, title: 'Produto', price: 10, quantity: 1 }],
+        totalAmount: 10,
+      });
+
+      // Order should be in PROCESSING status by default
+      const cancelled = await useCase.execute(created.id);
+
+      expect(cancelled.status).toBe('CANCELLED');
     });
   });
 });

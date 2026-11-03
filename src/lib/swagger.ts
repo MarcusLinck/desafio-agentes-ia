@@ -169,6 +169,7 @@ export const swaggerDefinition = {
               properties: {
                 field: { type: 'string', example: 'customerName' },
                 message: { type: 'string', example: 'Nome do cliente é obrigatório' },
+                details: { type: 'string', example: 'Informações adicionais sobre o erro' },
               },
             },
           },
@@ -217,8 +218,8 @@ export const swaggerDefinition = {
         type: 'object',
         required: ['message'],
         properties: {
-          threadId: { type: 'string', example: 'thread-123', description: 'ID opcional da thread de conversa para manter contexto' },
           message: { type: 'string', example: 'Olá, gostaria de saber o status do meu pedido', description: 'Mensagem do usuário para o agente' },
+          sessionId: { type: 'string', format: 'uuid', example: 'sess-abc123-def456', description: 'ID da sessão do cliente (gerado pelo servidor se não fornecido)' },
         },
       },
       AgentChatResponse: {

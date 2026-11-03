@@ -8,6 +8,10 @@ export class CreateOrderUseCase {
   async execute(data: CreateOrderInput & { totalAmount: number }): Promise<Order> {
     logger.info({ useCase: 'CreateOrderUseCase', customerName: data.customerName }, 'Executando caso de uso: Criar Pedido');
 
+    if (data.items.length === 0) {
+      throw new Error('O pedido deve conter pelo menos um item.');
+    }
+
     const totalAmount = data.items.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0
