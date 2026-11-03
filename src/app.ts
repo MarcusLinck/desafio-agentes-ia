@@ -9,6 +9,7 @@ import { logger } from './lib/logger.js';
 import orderRoutes from './http/routes/orderRoutes.js';
 import { productRoutes } from './http/routes/productRoutes.js';
 import agentRoutes from './http/routes/agentRoutes.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
@@ -41,6 +42,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDefinition));
 app.use('/api/v1', orderRoutes);
 app.use('/api/v1', productRoutes);
 app.use('/api/v1', agentRoutes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.get('/health', (_req: Request, res: Response) => {
   return res.status(200).json({
