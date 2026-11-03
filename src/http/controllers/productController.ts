@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { makeGetProductsUseCase } from '../../use-cases/factories/make-get-products-use-case.js';
 import { makeGetProductByIdUseCase } from '../../use-cases/factories/make-get-product-by-id-use-case.js';
 import { ProductNotFoundError } from '../../use-cases/errors/index.js';
+import { getProductParamSchema } from '../../validators/product.validator.js';
 
 export async function getExternalProducts(_req: Request, res: Response) {
   try {
@@ -24,14 +25,16 @@ export async function getExternalProducts(_req: Request, res: Response) {
 }
 
 export async function getExternalProductById(req: Request, res: Response) {
-  const productId = Number(req.params.id);
+  const validationResult = getProductParamSchema.safeParse(req.params);
 
-  if (isNaN(productId)) {
+  if (!validationResult.success) {
     return res.status(400).json({
       error: 'Parâmetro inválido',
-      message: 'O ID do produto deve ser um número válido.',
+      message: validationResult.error.issues[0]?.message,
     });
   }
+
+  const { id: productId } = validationResult.data;
 
   try {
     const getProductByIdUseCase = makeGetProductByIdUseCase();

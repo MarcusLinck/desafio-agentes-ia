@@ -1,18 +1,24 @@
 import { Request, Response } from 'express';
 import { supportAgent } from '../../agent/index.js';
+import { agentChatBodySchema } from '../../validators/product.validator.js';
 
 export async function handleAgentChat(req: Request, res: Response) {
+  const validationResult = agentChatBodySchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    return res.status(400).json({
+      error: 'Dados de entrada inválidos',
+      message: validationResult.error.issues[0]?.message,
+    });
+  }
+
+  const { message, sessionId } = validationResult.data;
+
   try {
-    const { threadId, message } = req.body;
-
-    if (!message || typeof message !== 'string') {
-      return res.status(400).json({ error: 'O campo "message" é obrigatório e deve ser uma string.' });
-    }
-
     const result = await supportAgent.generate(message, {
       memory: {
-        thread: threadId || 'default-thread',
-        resource: threadId || 'default-customer',
+        thread: sessionId || 'default-thread',
+        resource: sessionId || 'default-customer',
       },
     });
 
